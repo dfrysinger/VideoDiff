@@ -1,31 +1,40 @@
 __author__ = 'dfrysing'
 
 import cv2
-
-lastFrame = None
+import numpy
+import time
 
 cv2.namedWindow("My Window")
 
 video = cv2.VideoCapture('P1_4.m4v')
 
+successFlag, frame = video.read()
+
+lastFrame = frame.copy()
+
+h, w = frame.shape[:2]
+motionHistory = numpy.zeros((h, w), numpy.float)
+
 while 1:
-    successFlag, image = video.read()
+    successFlag, frame = video.read()
 
     if not successFlag:
         break
 
-    image = cv2.cvtColor(image, code=cv2.COLOR_BGR2GRAY)
+    frameDiff = cv2.absdiff(lastFrame, frame)
+    greyDiff = cv2.cvtColor(frameDiff, code=cv2.COLOR_BGR2GRAY)
 
-    if lastFrame is None:
-        lastFrame = image
+    retval, motionMask = cv2.threshold(greyDiff,10,1,cv2.THRESH_BINARY)
 
-    diffImage = cv2.absdiff(lastFrame, image)
-    retval, bitImage = cv2.threshold(diffImage,10,255,cv2.THRESH_BINARY)
+    timestamp = time.clock()
+    cv2.updateMotionHistory(motionMask, motionHistory, timestamp, 0.5)
+    mg_mask, mg_orient = cv2.calcMotionGradient( motionHistory, 0.25, 0.05, apertureSize=5 )
+    seg_mask, seg_bounds = cv2.segmentMotion(motionHistory, timestamp, 0.25)
 
-    total = sum(sum(bitImage))/255
+    total = sum(sum(motionMask))/8
     print "movement: ", total
 
-    cv2.imshow("My Window", bitImage)
+    cv2.imshow("My Window", motionHistory)
     cv2.waitKey(1)
 
-    lastFrame = image
+    lastFrame = frame.copy()
