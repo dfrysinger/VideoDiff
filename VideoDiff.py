@@ -31,10 +31,10 @@ while 1:
     mg_mask, mg_orient = cv2.calcMotionGradient( motionHistory, 0.25, 0.05, apertureSize=5 )
     seg_mask, seg_bounds = cv2.segmentMotion(motionHistory, timestamp, 0.25)
 
-    total = sum(sum(motionMask))/8
+    total = sum(sum(motionHistory))/8
     print "movement: ", total
 
-    cv2.imshow("My Window", motionMask)
+    cv2.imshow("My Window", motionHistory)
     cv2.waitKey(1)
 
     lastFrame = frame.copy()
