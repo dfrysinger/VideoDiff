@@ -13,7 +13,7 @@ successFlag, frame = video.read()
 lastFrame = frame.copy()
 
 h, w = frame.shape[:2]
-motionHistory = numpy.zeros((h, w), numpy.float)
+motionHistory = numpy.zeros((h, w), numpy.float32)
 
 while 1:
     successFlag, frame = video.read()
@@ -34,7 +34,7 @@ while 1:
     total = sum(sum(motionMask))/8
     print "movement: ", total
 
-    cv2.imshow("My Window", motionHistory)
+    cv2.imshow("My Window", motionMask)
     cv2.waitKey(1)
 
     lastFrame = frame.copy()
